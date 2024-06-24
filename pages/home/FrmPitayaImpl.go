@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"pitaya/pages/about"
 	"pitaya/pages/message"
-	"pitaya/pages/settings"
+	logger_settings "pitaya/pages/settings/logger"
+	mqtt_settings "pitaya/pages/settings/mqtt"
 	"time"
 
 	"github.com/go-vgo/robotgo"
@@ -25,6 +26,7 @@ func (f *TFrmPitaya) OnFormCreate(sender vcl.IObject) {
 	f.IsServerRun = false
 	// 后续修改为读取配置文件
 	f.ShowLogCount = 50
+	f.MenuItemServerSettings.SetCaption("日志设置")
 
 	f.TForm.SetPosition(types.PoScreenCenter)
 	f.TrayIcon.SetVisible(true)
@@ -40,6 +42,7 @@ func (f *TFrmPitaya) OnFormCreate(sender vcl.IObject) {
 	f.Timer.SetOnTimer(f.OnTimer)
 	f.MenuItemAbout.SetOnClick(f.OnAboutClick)
 	f.MenuItemServerSettings.SetOnClick(f.OnCronClick)
+	f.Menu_mqtt_settings.SetOnClick(f.OnMqttSettingsClick)
 	f.BtnServerRun.SetOnClick(f.OnRunServerClick)
 	f.BtnClearLog.SetOnClick(f.OnClearLogOnClick)
 	f.TForm.SetOnClose(f.OnFormClose)
@@ -54,6 +57,10 @@ func (f *TFrmPitaya) OnFormClose(sender vcl.IObject, action *types.TCloseAction)
 	}
 }
 
+func (f *TFrmPitaya) OnMqttSettingsClick(sender vcl.IObject) {
+	mqtt_settings.NewFrm_mqtt_settings(f).ShowModal()
+}
+
 func (f *TFrmPitaya) OnAppCloseClick(sender vcl.IObject) {
 	f.IsTrueClose = true
 	f.Close()
@@ -64,7 +71,7 @@ func (f *TFrmPitaya) OnAppShowClick(sender vcl.IObject) {
 }
 
 func (f *TFrmPitaya) OnCronClick(sender vcl.IObject) {
-	pitaya := settings.NewFrmPitayaSettings(f)
+	pitaya := logger_settings.NewFrm_logger_settings(nil)
 	pitaya.SetPosition(types.PoMainFormCenter)
 	pitaya.ShowModal()
 }

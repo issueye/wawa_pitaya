@@ -1,7 +1,8 @@
 *.exe
 
-*.dll
-
 tmp
 
 .vscode
+runtime
+
+*.zip

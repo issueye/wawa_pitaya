@@ -34,8 +34,6 @@ func InitSqlite(path string, log *zap.SugaredLogger) *gorm.DB {
 	}
 
 	db = db.Debug()
-
 	log.Infof("初始化sqlite数据库完成! dsn: %s", path)
-
 	return db
 }
