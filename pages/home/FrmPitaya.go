@@ -3,53 +3,48 @@
 package home
 
 import (
-    "github.com/ying32/govcl/vcl"
-    _ "embed"
+	_ "embed"
+
+	"github.com/ying32/govcl/vcl"
 )
 
-type TFrmPitaya struct {
-    *vcl.TForm
-    StatusBar              *vcl.TStatusBar
-    GroupBox1              *vcl.TGroupBox
-    MmoRunLog              *vcl.TMemo
-    Panel1                 *vcl.TPanel
-    BtnClearLog            *vcl.TBitBtn
-    GroupBox2              *vcl.TGroupBox
-    BtnServerRun           *vcl.TBitBtn
-    LblServerName          *vcl.TLabel
-    LblServerStartTime     *vcl.TLabel
-    MainMenu               *vcl.TMainMenu
-    MenuItem1              *vcl.TMenuItem
-    MenuItemServerSettings *vcl.TMenuItem
-    MenuItem5              *vcl.TMenuItem
-    MenuItemAbout          *vcl.TMenuItem
-    ImgList                *vcl.TImageList
-    Timer                  *vcl.TTimer
-    TrayIcon               *vcl.TTrayIcon
-    PopMenu                *vcl.TPopupMenu
-    PopMShow               *vcl.TMenuItem
-    PopMClose              *vcl.TMenuItem
-    Menu_mqtt_settings     *vcl.TMenuItem
+type TFrm_pitaya struct {
+	*vcl.TForm
+	StatusBar            *vcl.TStatusBar
+	Pnl_header           *vcl.TPanel
+	Btn_server_run       *vcl.TBitBtn
+	LblServerName        *vcl.TLabel
+	LV_table_data        *vcl.TListView
+	MainMenu             *vcl.TMainMenu
+	MenuItem1            *vcl.TMenuItem
+	Menu_logger_settings *vcl.TMenuItem
+	Menu_mqtt_settings   *vcl.TMenuItem
+	MenuItem5            *vcl.TMenuItem
+	MenuItemAbout        *vcl.TMenuItem
+	ImgList              *vcl.TImageList
+	Timer                *vcl.TTimer
+	TrayIcon             *vcl.TTrayIcon
+	PopMenu              *vcl.TPopupMenu
+	PopMShow             *vcl.TMenuItem
+	PopMClose            *vcl.TMenuItem
+	Menu_project_list    *vcl.TMenuItem
 
-    // ::private::
-    TFrmPitayaFields
+	// ::private::
+	TFrm_pitayaFields
 }
 
-var FrmPitaya *TFrmPitaya
-
-
-
+var Frm_pitaya *TFrm_pitaya
 
 // Loaded in bytes.
-// vcl.Application.CreateForm(&FrmPitaya)
+// vcl.Application.CreateForm(&Frm_pitaya)
 
-func NewFrmPitaya(owner vcl.IComponent) (root *TFrmPitaya)  {
-    vcl.CreateResForm(owner, &root)
-    return
+func NewFrm_pitaya(owner vcl.IComponent) (root *TFrm_pitaya) {
+	vcl.CreateResForm(owner, &root)
+	return
 }
 
 //go:embed FrmPitaya.gfm
-var FrmPitayaBytes []byte
+var Frm_pitayaBytes []byte
 
 // 注册窗口资源
-var _ = vcl.RegisterFormResource(FrmPitaya, &FrmPitayaBytes)
+var _ = vcl.RegisterFormResource(Frm_pitaya, &Frm_pitayaBytes)

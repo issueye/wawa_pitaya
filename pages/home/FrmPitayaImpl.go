@@ -6,6 +6,7 @@ import (
 	"pitaya/pages/message"
 	logger_settings "pitaya/pages/settings/logger"
 	mqtt_settings "pitaya/pages/settings/mqtt"
+	sub_project_list "pitaya/pages/settings/sub_project_list"
 	"time"
 
 	"github.com/go-vgo/robotgo"
@@ -14,19 +15,19 @@ import (
 )
 
 // ::private::
-type TFrmPitayaFields struct {
+type TFrm_pitayaFields struct {
 	IsServerRun  bool
 	ShowLogCount int32
 	IsTrueClose  bool
 	msg          *message.TFrmMessage
 }
 
-func (f *TFrmPitaya) OnFormCreate(sender vcl.IObject) {
+func (f *TFrm_pitaya) OnFormCreate(sender vcl.IObject) {
 	f.LblServerName.SetCaption("服务名称 火龙果后台服务")
 	f.IsServerRun = false
 	// 后续修改为读取配置文件
 	f.ShowLogCount = 50
-	f.MenuItemServerSettings.SetCaption("日志设置")
+	f.Menu_logger_settings.SetCaption("日志设置")
 
 	f.TForm.SetPosition(types.PoScreenCenter)
 	f.TrayIcon.SetVisible(true)
@@ -41,61 +42,62 @@ func (f *TFrmPitaya) OnFormCreate(sender vcl.IObject) {
 
 	f.Timer.SetOnTimer(f.OnTimer)
 	f.MenuItemAbout.SetOnClick(f.OnAboutClick)
-	f.MenuItemServerSettings.SetOnClick(f.OnCronClick)
+	f.Menu_logger_settings.SetOnClick(f.OnCronClick)
 	f.Menu_mqtt_settings.SetOnClick(f.OnMqttSettingsClick)
-	f.BtnServerRun.SetOnClick(f.OnRunServerClick)
-	f.BtnClearLog.SetOnClick(f.OnClearLogOnClick)
+	f.Btn_server_run.SetOnClick(f.OnRunServerClick)
+	f.Menu_project_list.SetOnClick(f.OnProjectListClick)
 	f.TForm.SetOnClose(f.OnFormClose)
 	f.PopMClose.SetOnClick(f.OnAppCloseClick)
 	f.PopMShow.SetOnClick(f.OnAppShowClick)
 }
 
-func (f *TFrmPitaya) OnFormClose(sender vcl.IObject, action *types.TCloseAction) {
+func (f *TFrm_pitaya) OnFormClose(sender vcl.IObject, action *types.TCloseAction) {
 	f.Hide()
 	if !f.IsTrueClose {
 		*action = types.CaHide
 	}
 }
 
-func (f *TFrmPitaya) OnMqttSettingsClick(sender vcl.IObject) {
+func (f *TFrm_pitaya) OnMqttSettingsClick(sender vcl.IObject) {
 	mqtt_settings.NewFrm_mqtt_settings(f).ShowModal()
 }
 
-func (f *TFrmPitaya) OnAppCloseClick(sender vcl.IObject) {
+func (f *TFrm_pitaya) OnAppCloseClick(sender vcl.IObject) {
 	f.IsTrueClose = true
 	f.Close()
 }
 
-func (f *TFrmPitaya) OnAppShowClick(sender vcl.IObject) {
+func (f *TFrm_pitaya) OnAppShowClick(sender vcl.IObject) {
 	f.Show()
 }
 
-func (f *TFrmPitaya) OnCronClick(sender vcl.IObject) {
+func (f *TFrm_pitaya) OnCronClick(sender vcl.IObject) {
 	pitaya := logger_settings.NewFrm_logger_settings(nil)
 	pitaya.SetPosition(types.PoMainFormCenter)
 	pitaya.ShowModal()
 }
 
-func (f *TFrmPitaya) OnAboutClick(sender vcl.IObject) {
+func (f *TFrm_pitaya) OnAboutClick(sender vcl.IObject) {
 	about := about.NewFrmAbout(nil)
 	about.SetPosition(types.PoMainFormCenter)
 	about.ShowModal()
 }
 
-func (f *TFrmPitaya) OnRunServerClick(sender vcl.IObject) {
-	panels := f.StatusBar.Panels()
-	f.TFrmPitayaFields.IsServerRun = !f.TFrmPitayaFields.IsServerRun
-	if f.TFrmPitayaFields.IsServerRun {
-		f.BtnServerRun.SetCaption("开启服务")
-		panels.Items(1).SetText("关闭")
-		f.addLog("关闭服务")
-	} else {
-		f.BtnServerRun.SetCaption("关闭服务")
+func (f *TFrm_pitaya) OnProjectListClick(sender vcl.IObject) {
+	proList := sub_project_list.NewFrm_project_info(nil)
+	proList.SetPosition(types.PoMainFormCenter)
+	proList.ShowModal()
+}
 
-		now := time.Now().Format("2006-01-02 15:04:05")
-		f.LblServerStartTime.SetCaption(fmt.Sprintf("开启时间 %s", now))
+func (f *TFrm_pitaya) OnRunServerClick(sender vcl.IObject) {
+	panels := f.StatusBar.Panels()
+	f.TFrm_pitayaFields.IsServerRun = !f.TFrm_pitayaFields.IsServerRun
+	if f.TFrm_pitayaFields.IsServerRun {
+		f.Btn_server_run.SetCaption("开启")
+		panels.Items(1).SetText("关闭")
+	} else {
+		f.Btn_server_run.SetCaption("关闭")
 		panels.Items(1).SetText("开启")
-		f.addLog("开启服务")
 	}
 
 	f.msg.SetMessage("测试内容")
@@ -107,22 +109,8 @@ func (f *TFrmPitaya) OnRunServerClick(sender vcl.IObject) {
 	}()
 }
 
-func (f *TFrmPitaya) OnTimer(sender vcl.IObject) {
+func (f *TFrm_pitaya) OnTimer(sender vcl.IObject) {
 	item := f.StatusBar.Panels().Items(3)
 	now := time.Now().Format("2006-01-02 15:04:05")
 	item.SetText(now)
-}
-
-func (f *TFrmPitaya) OnClearLogOnClick(sender vcl.IObject) {
-	f.MmoRunLog.Lines().Clear()
-}
-
-// 添加日志到主窗口中
-func (f *TFrmPitaya) addLog(msg string) {
-	now := time.Now().Format("2006-01-02 15:04:05")
-	f.MmoRunLog.Lines().Add(fmt.Sprintf("%s %s", msg, now))
-
-	if f.MmoRunLog.Lines().Count() > f.ShowLogCount {
-		f.MmoRunLog.Lines().Delete(0)
-	}
 }

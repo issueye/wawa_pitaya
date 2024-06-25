@@ -11,5 +11,5 @@ import (
 func main() {
 	initialize.Initialize()
 
-	vcl.RunApp(&home.FrmPitaya)
+	vcl.RunApp(&home.Frm_pitaya)
 }
