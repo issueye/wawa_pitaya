@@ -2,6 +2,7 @@ package home
 
 import (
 	"fmt"
+	"pitaya/internal/mqtt"
 	"pitaya/pages/about"
 	"pitaya/pages/message"
 	logger_settings "pitaya/pages/settings/logger"
@@ -38,7 +39,6 @@ func (f *TFrm_pitaya) OnFormCreate(sender vcl.IObject) {
 	f.msg.SetTop(10)
 	sx, _ := robotgo.GetScreenSize()
 	f.msg.SetLeft(int32(sx) - f.msg.Width() - 10)
-	fmt.Println("left", f.msg.Left())
 
 	f.Timer.SetOnTimer(f.OnTimer)
 	f.MenuItemAbout.SetOnClick(f.OnAboutClick)
@@ -49,6 +49,8 @@ func (f *TFrm_pitaya) OnFormCreate(sender vcl.IObject) {
 	f.TForm.SetOnClose(f.OnFormClose)
 	f.PopMClose.SetOnClick(f.OnAppCloseClick)
 	f.PopMShow.SetOnClick(f.OnAppShowClick)
+
+	f.StatusBar.Panels().Items(1).SetText("停用")
 }
 
 func (f *TFrm_pitaya) OnFormClose(sender vcl.IObject, action *types.TCloseAction) {
@@ -93,14 +95,23 @@ func (f *TFrm_pitaya) OnRunServerClick(sender vcl.IObject) {
 	panels := f.StatusBar.Panels()
 	f.TFrm_pitayaFields.IsServerRun = !f.TFrm_pitayaFields.IsServerRun
 	if f.TFrm_pitayaFields.IsServerRun {
-		f.Btn_server_run.SetCaption("开启")
-		panels.Items(1).SetText("关闭")
+		f.Btn_server_run.SetCaption("停用")
+		panels.Items(1).SetText("启用")
+
+		f.msg.SetMessage("程序已启用")
+
+		// 创建 mqtt 客户端
+		err := mqtt.NewMqttClient()
+		if err != nil {
+			vcl.ShowMessage(fmt.Sprintf("MQTT创建失败 %s", err.Error()))
+			return
+		}
 	} else {
-		f.Btn_server_run.SetCaption("关闭")
-		panels.Items(1).SetText("开启")
+		f.Btn_server_run.SetCaption("启用")
+		panels.Items(1).SetText("停用")
+		f.msg.SetMessage("程序已停用")
 	}
 
-	f.msg.SetMessage("测试内容")
 	f.msg.Show()
 
 	go func() {

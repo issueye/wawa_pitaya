@@ -16,14 +16,20 @@ type TFrm_project_infoFields struct {
 	srv *service.ProjectList
 
 	tableData []*model.ProjectList
+	fresh     chan struct{}
+
+	ButtonList []*vcl.TButton
 }
 
 func (f *TFrm_project_info) OnFormCreate(sender vcl.IObject) {
 	f.srv = &service.ProjectList{}
 	f.tableData = make([]*model.ProjectList, 0)
+	f.ButtonList = make([]*vcl.TButton, 0)
 	f.Btn_add.SetOnClick(f.OnBtn_addClick)
 	f.Lv_data_table.SetOnCustomDrawSubItem(f.OnLv_data_tableCustomDrawSubItem)
 	f.GetData()
+	f.fresh = make(chan struct{})
+	f.Monitor()
 }
 
 // 添加按钮事件
@@ -57,6 +63,10 @@ func (f *TFrm_project_info) OnLv_data_tableCustomDrawSubItem(sender *vcl.TListVi
 		if item.Data() == nil {
 			*defaultDraw = false
 
+			if int(item.Index()) > len(f.tableData) {
+				return
+			}
+
 			btn := vcl.NewButton(sender)
 			btn.SetParent(sender)
 			btn.SetCaption("删除")
@@ -74,21 +84,36 @@ func (f *TFrm_project_info) OnLv_data_tableCustomDrawSubItem(sender *vcl.TListVi
 				err := f.srv.Delete(uint(data.Id))
 				if err != nil {
 					global.Logger.Errorf("删除数据失败：%v", err)
-					vcl.ShowMessage("删除数据失败：" + err.Error())
 					return
 				}
 
-				vcl.ThreadSync(func() {
-					f.GetData()
-				})
+				f.fresh <- struct{}{}
 			})
 			item.SetData((unsafe.Pointer)(&btn))
+
+			f.ButtonList = append(f.ButtonList, btn)
 		}
 	}
 }
 
+func (f *TFrm_project_info) Monitor() {
+	go func() {
+		for {
+			select {
+			case <-f.fresh:
+				vcl.ThreadSync(func() {
+					f.GetData()
+					// vcl.ShowMessage("刷新成功")
+				})
+			}
+		}
+	}()
+}
+
 func (f *TFrm_project_info) GetData() {
 	var err error
+	f.tableData = make([]*model.ProjectList, 0)
+
 	f.tableData, err = f.srv.List()
 	if err != nil {
 		global.Logger.Errorf("获取列表失败：%v", err)
@@ -96,8 +121,20 @@ func (f *TFrm_project_info) GetData() {
 		return
 	}
 
+	fmt.Println("f.tableData", len(f.tableData))
+
 	f.Lv_data_table.Items().BeginUpdate()
 	f.Lv_data_table.Items().Clear()
+
+	// 释放所有按钮
+	for _, btn := range f.ButtonList {
+		btn.SetVisible(false)
+		btn.SetParent(nil)
+		btn.Free()
+	}
+
+	f.ButtonList = make([]*vcl.TButton, 0)
+
 	for _, data := range f.tableData {
 		item := f.Lv_data_table.Items().Add()
 		item.SetCaption(data.Topic)

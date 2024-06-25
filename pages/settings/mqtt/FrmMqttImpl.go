@@ -41,3 +41,7 @@ func (f *TFrm_mqtt_settings) OnBtn_saveClick(sender vcl.IObject) {
 func (f *TFrm_mqtt_settings) OnBtn_cancelClick(sender vcl.IObject) {
 	f.Close()
 }
+
+func (f *TFrm_mqtt_settings) OnEdt_userChange(sender vcl.IObject) {
+
+}
