@@ -23,6 +23,7 @@ type TFrm_logger_settings struct {
 	Lbl_level    *vcl.TLabel
 	Lbl_backups  *vcl.TLabel
 	Edt_backups  *vcl.TSpinEdit
+	Edt_runtime  *vcl.TEdit
 
 	// ::private::
 	TFrm_logger_settingsFields

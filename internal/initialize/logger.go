@@ -8,7 +8,7 @@ import (
 
 func InitLogger() {
 	cfg := &logger.Config{
-		Path:       config.GetParam(config.CfgLogPath, "log").String(),
+		Path:       config.GetParam(config.CfgLogPath, "runtime/logs").String(),
 		MaxSize:    config.GetParam(config.CfgLogMaxSize, "100").Int(),
 		MaxAge:     config.GetParam(config.CfgLogMaxAge, "30").Int(),
 		MaxBackups: config.GetParam(config.CfgLogMaxBackups, "30").Int(),

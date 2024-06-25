@@ -1,7 +1,9 @@
 package frm_logger
 
 import (
+	"fmt"
 	"pitaya/internal/config"
+	"strings"
 
 	"github.com/ying32/govcl/vcl"
 )
@@ -19,15 +21,18 @@ func (f *TFrm_logger_settings) OnFormCreate(sender vcl.IObject) {
 }
 
 func (f *TFrm_logger_settings) SetValue() {
-	f.Edt_log_path.SetText(config.GetParam(config.CfgLogPath, "").String())
+	path := config.GetParam(config.CfgLogPath, "").String()
+	path = strings.TrimPrefix(path, "runtime/")
+	f.Edt_log_path.SetText(path)
 	f.Cmb_level.SetText(config.GetParam(config.CfgLogLevel, "").String())
-	f.Edt_age.SetValue(int32(config.GetParam(config.CfgLogMaxBackups, "30").Int()))
+	f.Edt_age.SetValue(int32(config.GetParam(config.CfgLogMaxAge, "30").Int()))
 	f.Edt_backups.SetValue(int32(config.GetParam(config.CfgLogMaxBackups, "30").Int()))
 	f.Ckb_compress.SetChecked(config.GetParam(config.CfgLogCompress, "true").Bool())
 }
 
 func (f *TFrm_logger_settings) GetValue() {
-	config.SetParam(config.CfgLogPath, f.Edt_log_path.Text(), "日志存放路径")
+	path := fmt.Sprintf("%s/%s", f.Edt_runtime.Text(), f.Edt_log_path.Text())
+	config.SetParam(config.CfgLogPath, path, "日志存放路径")
 	config.SetParam(config.CfgLogLevel, f.Cmb_level.Text(), "日志等级")
 	config.SetParam(config.CfgLogMaxAge, f.Edt_age.Text(), "保存天数")
 	config.SetParam(config.CfgLogMaxBackups, f.Edt_backups.Text(), "日志备份数")
